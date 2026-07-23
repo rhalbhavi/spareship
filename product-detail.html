@@ -20,7 +20,7 @@
     </style>
 </head>
 <body
-    x-data="spareshipApp()"
+    x-data="spareshipApp({ isProductPage: true })"
     x-init="init()"
     @keydown.escape.window="closeMegaMenu()" class="antialiased text-slate-800 bg-white"
 >
@@ -70,6 +70,69 @@
                                                     <div @click="filters.city = city; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" x-text="city"></div>
                                                 </template>
                                                 <div x-show="cities.filter(c => !hasTyped || c.toLowerCase().includes((search || '').toLowerCase())).length === 0" class="px-4 py-2 text-sm text-gray-500">No city found.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Separator -->
+                                    <div class="h-5 w-px bg-slate-300"></div>
+                                    <!-- Store/Seller Dropdown -->
+                                    <div x-data="{ open: false, search: filters.headerStore, hasTyped: false }"
+                                         x-init="$watch('filters.headerStore', val => search = val)"
+                                         @click.away="open = false; hasTyped = false; search = filters.headerStore"
+                                         class="relative h-full flex items-center">
+                                        <div class="relative">
+                                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none material-icons text-slate-400 text-[18px]">storefront</span>
+                                            <input
+                                                type="text"
+                                                x-model="search"
+                                                @focus="open = true; setTimeout(() => $event.target.setSelectionRange(0, 0), 0);"
+                                                @keydown="if (!hasTyped && $event.key.length === 1) { search = ''; hasTyped = true; }"
+                                                @input.debounce.300ms="hasTyped = true; open = true; if (search === '') filters.headerStore = 'All Stores'"
+                                                placeholder="Select Store"
+                                                class="w-40 border-0 bg-transparent py-[7px] pl-10 pr-6 text-slate-900 placeholder:text-slate-400 focus:placeholder:text-slate-500 focus:ring-0 sm:text-[15px] sm:leading-6"
+                                            >
+                                            <button @click="open = !open" class="absolute inset-y-0 right-0 flex items-center px-2">
+                                                <span class="text-xs">▾</span>
+                                            </button>
+                                        </div>
+                                        <div x-show="open" x-transition x-cloak class="absolute z-10 mt-1 top-full w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                            <div class="py-1 max-h-60 overflow-y-auto">
+                                                <div x-show="!hasTyped || 'All Stores'.toLowerCase().includes((search || '').toLowerCase())" @click="filters.headerStore = 'All Stores'; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">All Stores</div>
+                                                <template x-for="store in stores.filter(s => !hasTyped || s.toLowerCase().includes((search || '').toLowerCase()))" :key="store">
+                                                    <div @click="filters.headerStore = store; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" x-text="store"></div>
+                                                </template>
+                                                <div x-show="hasTyped && !('All Stores'.toLowerCase().includes((search || '').toLowerCase())) && stores.filter(s => s.toLowerCase().includes((search || '').toLowerCase())).length === 0" class="px-4 py-2 text-sm text-gray-500">No stores found.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Separator -->
+                                    <div class="h-5 w-px bg-slate-300"></div>
+                                    <!-- Vehicle Type Dropdown (connected to main app state) -->
+                                    <div x-data="{ open: false, search: filters.vehicleType, hasTyped: false }"
+                                         x-init="$watch('filters.vehicleType', val => { search = val; if (val === 'All Vehicle Types') { filters.category = 'All Categories'; } })"
+                                         @click.away="open = false; hasTyped = false; search = filters.vehicleType"
+                                         class="relative h-full flex items-center">
+                                        <div class="relative">
+                                            <input
+                                                type="text"
+                                                x-model="search"
+                                                @focus="open = true; setTimeout(() => $event.target.setSelectionRange(0, 0), 0);"
+                                                @keydown="if (!hasTyped && $event.key.length === 1) { search = ''; hasTyped = true; }"
+                                                @input.debounce.300ms="hasTyped = true; open = true; if (search === '') filters.vehicleType = 'All Vehicle Types'"
+                                                placeholder="Vehicle Type"
+                                                class="w-[130px] border-0 bg-transparent py-[7px] pl-3 pr-6 text-slate-900 placeholder:text-slate-400 focus:placeholder:text-slate-500 focus:ring-0 sm:text-[15px] sm:leading-6"
+                                            >
+                                            <button @click="open = !open" class="absolute inset-y-0 right-0 flex items-center px-2">
+                                                <span class="text-xs">▾</span>
+                                            </button>
+                                        </div>
+                                        <div x-show="open" x-transition x-cloak class="absolute z-10 mt-1 top-full w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                            <div class="py-1 max-h-60 overflow-y-auto">
+                                                <div x-show="!hasTyped || 'All Vehicle Types'.toLowerCase().includes((search || '').toLowerCase())" @click="filters.vehicleType = 'All Vehicle Types'; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">All Vehicle Types</div>
+                                                <template x-for="type in vehicleTypes.filter(t => !hasTyped || t.toLowerCase().includes((search || '').toLowerCase()))" :key="type">
+                                                    <div @click="filters.vehicleType = type; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" x-text="type"></div>
+                                                </template>
+                                                <div x-show="!('All Vehicle Types'.toLowerCase().includes((search || '').toLowerCase())) && vehicleTypes.filter(t => t.toLowerCase().includes((search || '').
                                             </div>
                                         </div>
                                     </div>
