@@ -23,7 +23,6 @@
 </head>
 <body
     x-data="spareshipApp()"
-    x-init="init()"
     class="antialiased text-slate-300 bg-slate-900"
     @keydown.escape.window="closeMegaMenu()"
 >
@@ -113,7 +112,7 @@
             </div>
         </header>
 
-        <!-- Mega Menu Navigation is already correct from the previous fix -->
+        <!-- Mega Menu Navigation -->
         <div @mouseleave="closeMegaMenu()" class="relative">
             <nav class="bg-slate-100 shadow-md">
                 <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -473,6 +472,9 @@
                         'Chassis & Brakes': ['Regenerative Braking System', 'EV-specific Brake Pads']
                     }
                 },
+                price: { min: 150, max: 15000 },
+
+                // Data
                 vehicleTypes: ['2-Wheeler', '4-Wheeler', 'EV'],
                 categoryData: {
                    '2-Wheeler': [ 'Engine Parts', 'Braking Systems', 'Suspension & Steering', 'Electricals & Electronics', 'Body & Frame', 'Fluids & Consumables' ],
@@ -613,16 +615,6 @@
                     const allCategories = Object.values(this.categoryData).flat();
                     return [...new Set(allCategories)].sort();
                 },
-                activeMegaMenuData() {
-                    return this.megaMenuData[this.activeMegaMenu] || {};
-                },
-                activeSubCategories() {
-                    if (this.activeParentCategory && this.activeMegaMenuData()[this.activeParentCategory]) {
-                        return this.activeMegaMenuData()[this.activeParentCategory];
-                    }
-                    const firstParent = Object.keys(this.activeMegaMenuData())[0];
-                    return firstParent ? this.activeMegaMenuData()[firstParent] : [];
-                },
                 get filteredProducts() {
                     return this.products
                         .map(p => ({ ...p, lowestPrice: Math.min(...p.sellers.map(s => s.price)) }))
@@ -639,17 +631,6 @@
                         .sort((a, b) => a.lowestPrice - b.lowestPrice);
                 },
 
-                activeMegaMenuData() {
-                    return this.megaMenuData[this.activeMegaMenu] || {};
-                },
-                activeSubCategories() {
-                    if (this.activeParentCategory && this.activeMegaMenuData()[this.activeParentCategory]) {
-                        return this.activeMegaMenuData()[this.activeParentCategory];
-                    }
-                    const firstParent = Object.keys(this.activeMegaMenuData())[0];
-                    return firstParent ? this.activeMegaMenuData()[firstParent] : [];
-                },
-
                 // Methods
                 slugify(text) {
                     if (!text) return '';
@@ -658,17 +639,6 @@
                         .replace(/&/g, 'and')          // Replace & with 'and'
                         .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
                         .replace(/\-\-+/g, '-');        // Replace multiple - with single -
-                },
-                openMegaMenu(menu) {
-                    this.megaMenuOpen = true;
-                    this.activeMegaMenu = menu;
-                    this.activeParentCategory = Object.keys(this.activeMegaMenuData())[0];
-                },
-                closeMegaMenu() {
-                    this.megaMenuOpen = false;
-                },
-                setActiveParentCategory(parent) {
-                    this.activeParentCategory = parent;
                 },
 
                 init() {
