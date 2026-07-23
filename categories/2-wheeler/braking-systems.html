@@ -472,7 +472,6 @@
                         'Chassis & Brakes': ['Regenerative Braking System', 'EV-specific Brake Pads']
                     }
                 },
-                price: { min: 150, max: 15000 },
 
                 // Data
                 vehicleTypes: ['2-Wheeler', '4-Wheeler', 'EV'],
@@ -588,7 +587,6 @@
                     if (this.filters.bike.brand && this.bikeData[this.filters.bike.brand]) {
                         return Object.keys(this.bikeData[this.filters.bike.brand]);
                     }
-                    // If no brand is selected, show all models.
                     const models = new Set();
                     for (const brand in this.bikeData) {
                         for (const model in this.bikeData[brand]) {
@@ -598,11 +596,9 @@
                     return Array.from(models).sort();
                 },
                 get availableYears() {
-                    // If a valid brand and model are selected, show specific years.
                     if (this.filters.bike.brand && this.filters.bike.model && this.bikeData[this.filters.bike.brand] && this.bikeData[this.filters.bike.brand][this.filters.bike.model]) {
                         return this.bikeData[this.filters.bike.brand][this.filters.bike.model];
                     }
-                    // Otherwise, show all possible years.
                     const years = new Set();
                     for (const brand in this.bikeData) {
                         for (const model in this.bikeData[brand]) {
@@ -634,6 +630,17 @@
                         .sort((a, b) => a.lowestPrice - b.lowestPrice);
                 },
 
+                activeMegaMenuData() {
+                    return this.megaMenuData[this.activeMegaMenu] || {};
+                },
+                activeSubCategories() {
+                    if (this.activeParentCategory && this.activeMegaMenuData()[this.activeParentCategory]) {
+                        return this.activeMegaMenuData()[this.activeParentCategory];
+                    }
+                    const firstParent = Object.keys(this.activeMegaMenuData())[0];
+                    return firstParent ? this.activeMegaMenuData()[firstParent] : [];
+                },
+
                 // Methods
                 slugify(text) {
                     if (!text) return '';
@@ -642,6 +649,11 @@
                         .replace(/&/g, 'and')          // Replace & with 'and'
                         .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
                         .replace(/\-\-+/g, '-');        // Replace multiple - with single -
+                },
+                openMegaMenu(menu) {
+                    this.megaMenuOpen = true;
+                    this.activeMegaMenu = menu;
+                    this.activeParentCategory = Object.keys(this.activeMegaMenuData())[0];
                 },
 
                 init() {
@@ -660,8 +672,6 @@
                     }
 
                     // Set initial filter state for this category page
-                    // IMPORTANT: This must be updated for each category page.
-                    // For example, on /categories/2-Wheeler/braking-systems.html:
                     this.filters.vehicleType = '2-Wheeler';
                     this.filters.category = 'Braking Systems';
 
@@ -671,16 +681,18 @@
 
                     this.$watch('filters.vehicleType', (newVehicleType) => {
                         if (newVehicleType !== 'All Vehicle Types' && this.filters.category !== 'All Categories') {
-                            // Check if the current category is valid for the new vehicle type
                             if (!this.categoryData[newVehicleType].includes(this.filters.category)) {
                                 this.filters.category = 'All Categories';
                             }
                         }
                     });
 
+                    this.closeMegaMenu = () => {
+                        this.megaMenuOpen = false;
+                    };
+                    this.setActiveParentCategory = (parent) => { this.activeParentCategory = parent; };
                     // Add watchers for intelligent cascading dropdowns
                     this.$watch('filters.bike.brand', (newBrand) => {
-                        // If the current model is not valid for the new brand, reset only the model.
                         if (this.filters.bike.model && (!this.bikeData[newBrand] || !this.bikeData[newBrand][this.filters.bike.model])) {
                             this.filters.bike.model = '';
                         }
@@ -688,7 +700,6 @@
 
                     this.$watch('filters.bike.model', (newModel) => {
                         const brand = this.filters.bike.brand;
-                        // If the current year is not valid for the new model (and a brand is selected), reset year.
                         if (brand && newModel && this.filters.bike.year && (!this.bikeData[brand][newModel] || !this.bikeData[brand][newModel].includes(this.filters.bike.year))) {
                             this.filters.bike.year = '';
                         }
@@ -700,3 +711,4 @@
 
 </body>
 </html>
+
