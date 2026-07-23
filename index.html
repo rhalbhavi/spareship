@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Auto & EV Spare Parts Marketplace | Spareship</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Noto+Sans&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'PT Sans', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Alfa Slab One', cursive; letter-spacing: 0.07em; }
+        .font-ptsans { font-family: 'PT Sans', sans-serif; }
+        .font-notosans { font-family: 'Noto Sans', sans-serif; }
+        [x-cloak] { display: none !important; }
+        .range-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #4f46e5; border-radius: 50%; cursor: pointer; }
+        .range-slider::-moz-range-thumb { width: 20px; height: 20px; background: #4f46e5; border-radius: 50%; cursor: pointer; }
+    </style>
+</head>
+<body
+    x-data="spareshipApp()"    
+    class="antialiased text-slate-300 bg-slate-900"
+>
+
+    <!-- Main Container -->
+    <div class="flex flex-col min-h-screen" @keydown.escape.window="closeMegaMenu()">
+ 
+        <!-- Header -->
+        <header class="sticky top-0 z-30 w-full bg-[#1f004b] border-b border-slate-700/50 h-[66px]">
+            <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+                <div class="flex items-center justify-between h-full">
+                    <!-- Left side: Branding & Search -->
+                    <div class="flex items-center flex-1">
+                        <!-- App Branding -->
+                        <div class="flex-shrink-0">
+                            <a href="/index.html" class="flex items-center space-x-3">
+                                <svg class="w-[34px] h-[34px] text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                                <h1 class="text-[24px] font-bold text-white">spareship</h1>
+                            </a>
+                        </div>
+                        <!-- Search Bar -->
+                        <div class="hidden sm:block w-full max-w-5xl ml-8">
+                                <div class="flex items-center w-full bg-white rounded-md ring-1 ring-inset ring-slate-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
+                                    <!-- City Selector -->
+                                    <div x-data="{ open: false, search: filters.city, hasTyped: false }"
+                                         x-init="$watch('filters.city', val => search = val)"
+                                         @click.away="open = false; hasTyped = false; search = filters.city"
+                                         class="relative h-full flex items-center">
+                                        <div class="relative">
+                                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">📍</span>
+                                            <input
+                                                type="text"
+                                                x-model="search"
+                                                @focus="open = true; setTimeout(() => $event.target.setSelectionRange(0, 0), 0);"
+                                                @keydown="if (!hasTyped && $event.key.length === 1) { search = ''; hasTyped = true; }"
+                                                @input.debounce.300ms="hasTyped = true; open = true; if (search === '') filters.city = 'Bengaluru, KA'"
+                                                placeholder="Select City"
+                                                class="w-40 border-0 bg-transparent py-[7px] pl-8 pr-6 text-slate-900 placeholder:text-slate-400 focus:placeholder:text-slate-500 focus:ring-0 sm:text-[15px] sm:leading-6 rounded-l-md"
+                                            >
+                                            <button @click="open = !open" class="absolute inset-y-0 right-0 flex items-center px-2">
+                                                <span class="text-xs">▾</span>
+                                            </button>
+                                        </div>
+                                        <div x-show="open" x-transition x-cloak class="absolute z-10 mt-1 top-full w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                            <div class="max-h-60 overflow-y-auto">
+                                                <template x-for="city in cities.filter(c => !hasTyped || c.toLowerCase().includes((search || '').toLowerCase()))" :key="city">
+                                                    <div @click="filters.city = city; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" x-text="city"></div>
+                                                </template>
+                                                <div x-show="cities.filter(c => !hasTyped || c.toLowerCase().includes((search || '').toLowerCase())).length === 0" class="px-4 py-2 text-sm text-gray-500">No city found.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Separator -->
+                                    <div class="h-5 w-px bg-slate-300"></div>
+                                    <!-- Search Input -->
+                                    <div class="relative flex-grow h-full flex items-center">
+                                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                            <span class="material-icons text-slate-400 text-[20px]">search</span>
+                                        </div>
+                                        <input type="text" name="search" id="search" class="block w-full border-0 bg-transparent py-[7px] pl-10 pr-3 text-slate-900 placeholder:text-slate-400 focus:ring-0 sm:text-[15px] sm:leading-6 h-full" placeholder="Search Spareship">
+                                    </div>
+                                    <button @click="window.location.href = '/index.html'" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-[7px] px-[19px] rounded-r-md">Search</button>
+                                </div>
+                        </div>
+                    </div>
+                    <!-- Right side: Actions & Mobile Menu Toggle -->
+                    <div class="flex items-center space-x-2 sm:space-x-4 ml-4">
+                        <div class="hidden sm:flex items-center space-x-2">
+                            <a href="#" class="text-[15px] font-medium text-white bg-[oklch(43.2%_0.232_292.759)] hover:opacity-90 transition-colors px-[15px] py-[7px] rounded-md flex items-center space-x-2">
+                                <span class="material-icons text-[16px]">account_circle</span>
+                                <span>Login / Sign Up</span>
+                            </a>
+                            <span class="text-white text-lg mx-2" aria-hidden="true">|</span>
+                            <a href="/tools.html" class="text-[15px] font-medium bg-yellow-400 hover:bg-yellow-500 text-black transition-colors px-[15px] py-[7px] rounded-md flex items-center space-x-2">
+                                <span class="material-icons text-[16px]">build</span>
+                                <span>Tools</span>
+                            </a>
+                        </div>
+                        <button class="lg:hidden text-slate-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mega Menu Navigation -->
+        <div @mouseleave="closeMegaMenu()" class="relative">
+            <nav class="bg-slate-100 shadow-md">
+                <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-center h-12">
+                        <div class="flex space-x-8">
+                            <div @mouseenter="openMegaMenu('2-Wheeler Parts')" class="flex items-center">
+                                <a href="#" class="text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-bold font-ptsans">2-Wheeler Parts</a>
+                            </div>
+                            <div @mouseenter="openMegaMenu('4-Wheeler Parts')" class="flex items-center">
+                                <a href="#" class="text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-bold font-ptsans">4-Wheeler Parts</a>
+                            </div>
+                            <div @mouseenter="openMegaMenu('EV Parts')" class="flex items-center">
+                                <a href="#" class="text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-bold font-ptsans">EV Parts</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Mega Menu Panel -->
+            <div x-show="megaMenuOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-2"
+                 x-cloak
+                 class="absolute top-full left-0 w-full bg-white border-t border-slate-200 shadow-lg z-40">
+                <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-12 gap-8 py-6">
+                    <!-- Left Column: Parent Categories -->
+                    <div class="col-span-3">
+                        <ul class="space-y-1">
+                            <template x-for="parentCategory in Object.keys(activeMegaMenuData())" :key="parentCategory">
+                                <li @mouseenter="setActiveParentCategory(parentCategory)">
+                                    <a :href="`/categories/${slugify(activeMegaMenu.replace(' Parts', ''))}/${slugify(parentCategory)}.html`" class="flex justify-between items-center p-3 rounded-lg text-slate-700 font-semibold text-base transition-colors duration-150" :class="{ 'bg-slate-100 text-indigo-600': activeParentCategory === parentCategory, 'hover:bg-slate-50': activeParentCategory !== parentCategory }">
+                                        <span x-text="parentCategory"></span>
+                                        <span class="material-icons text-lg">chevron_right</span>
+                                    </a>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                    <!-- Right Column: Sub-Categories -->
+                    <div class="col-span-9">
+                        <div class="grid grid-cols-4 gap-x-6 gap-y-4">
+                            <template x-for="subCategory in activeSubCategories()" :key="subCategory">
+                                <a :href="`/categories/${slugify(activeMegaMenu.replace(' Parts', ''))}/${slugify(activeParentCategory)}/${slugify(subCategory)}.html`" class="block p-2 rounded-md hover:bg-slate-50 text-base text-slate-600 hover:text-indigo-600" x-text="subCategory"></a>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 max-w-8xl mx-auto w-full">
+            <div>
+
+                <!-- Product Directory & Tally Simulator -->
+                <main class="bg-white p-6 lg:pt-8 text-slate-800 lg:min-w-0">
+                    <div>
+
+                            <!-- Hero / Marketplace Promo Section -->
+                            <section class="text-center mb-16 mt-6">
+                                <h1 class="text-[25px] md:text-[31px] lg:text-[43px] font-bold text-slate-900 leading-tight" style="margin: 50px 150px 0 150px;">
+                                    Genuine Auto and EV Parts from Trusted Wholesalers Near You
+                                </h1>
+                                <p class="mt-[22px] text-[21px] text-slate-600 font-ptsans font-bold max-w-3xl mx-auto">
+                                    Source OEM and aftermarket spare parts directly from verified regional distributors. Instant availability, direct distributor pricing, and delivery to your doorstep.
+                                </p>
+
+                                <!-- Shop by Category -->
+                                <div class="mt-12">
+                                    <h3 class="text-[24px] font-bold text-slate-800 mb-5 flex items-center justify-center">
+                                        <span class="material-icons text-xl mr-2">category</span>
+                                        <span>Product Categories</span>
+                                    </h3>
+                                    <div class="mt-[38px] max-w-[1500px] mx-auto grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+                                        <template x-for="(vehicleType, index) in vehicleTypes" :key="vehicleType">
+                                            <div class="px-6 py-8 text-left bg-yellow-400" :class="{ 'pt-0 md:py-8': index === 0 }">
+                                                <h4 class="font-bold text-slate-800 mb-4 text-[20px] flex items-center">
+                                                    <span class="material-icons mr-2" x-show="vehicleType === '2-Wheeler'">two_wheeler</span>
+                                                    <span class="material-icons mr-2" x-show="vehicleType === '4-Wheeler'">directions_car</span>
+                                                    <span class="material-icons mr-2" x-show="vehicleType === 'EV'">bolt</span>
+                                                    <span x-text="vehicleType"></span>
+                                                </h4>
+                                                <div class="grid grid-cols-2 gap-3 mb-6">
+                                                    <template x-for="cat in categoryData[vehicleType].slice(0, 6)" :key="cat">
+                                                        <a :href="`/categories/${slugify(vehicleType)}/${slugify(cat)}.html`" class="block bg-white rounded-lg text-center hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+                                                            <img :src="`/assets/images/${slugify(vehicleType)}/${slugify(cat)}.png`" :alt="cat" class="h-24 w-full object-cover">
+                                                            <div class="p-3">
+                                                                <span class="font-semibold text-slate-700 text-base font-ptsans" x-text="cat"></span>
+                                                            </div>
+                                                        </a>
+                                                    </template>
+                                                </div>
+                                                <a :href="`/categories/${slugify(vehicleType)}.html`" class="block w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors duration-200">
+                                                    <span x-text="`Browse All ${vehicleType} Parts`"></span> &rarr;
+                                                </a>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                            </section>
+
+                            <h2 class="text-2xl font-bold text-slate-900 mb-6">Products</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                                <template x-for="product in filteredProducts" :key="product.sku">
+                                     <div @click="window.location.href=`/product-detail.html?sku=${product.sku}`" class="bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex flex-col cursor-pointer group">
+                                         <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover">
+                                         <div class="p-5">
+                                             <h4 class="text-lg font-semibold text-slate-800 font-ptsans tracking-normal" x-text="product.name"></h4>
+                                             <p class="text-xs text-slate-500 mb-2">OEM: <span x-text="product.sku"></span></p>
+                                             <div class="flex flex-wrap gap-2 my-3">
+                                                 <template x-for="tag in product.compatibility" :key="tag">
+                                                     <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full" x-text="tag"></span>
+                                                 </template>
+                                             </div>
+                                             <div class="mt-4">
+                                                 <div>
+                                                     <p class="text-sm text-slate-500">Starts from</p>
+                                                     <p class="text-2xl font-bold text-green-600"><span class="font-notosans">₹</span><span x-text="product.lowestPrice.toLocaleString('en-IN')"></span></p>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                         <div class="mt-auto p-5 pt-0">
+                                             <button @click.stop="" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                                                 <span class="material-icons">shopping_cart</span>
+                                                 <span>Add to Cart</span>
+                                             </button>
+                                         </div>
+                                     </div>
+                                 </template>
+                                <div x-show="filteredProducts.length === 0" class="md:col-span-2 text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                                    <svg class="mx-auto h-12 w-12 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    <h3 class="mt-2 text-lg font-medium text-slate-900">No Products Found</h3>
+                                    <p class="mt-1 text-sm text-slate-500">Adjust your filters to find what you're looking for.</p>
+                                </div>
+                        </div>
+                </main>
+            </div>
+        </div>
+        <!-- Footer -->
+        <footer class="bg-[#1f004b] text-white">
+            <div class="max-w-8xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <h3 class="text-lg">About Us</h3>
+                        <ul class="mt-4 space-y-2">
+                            <li>
+                                <a href="/about.html" class="text-base text-gray-300 hover:text-white font-ptsans">About Us</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg">Connect With Us</h3>
+                        <ul class="mt-4 space-y-2">
+                            <li>
+                                <a href="https://www.facebook.com/profile.php?id=61591875527493" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white">
+                                    <span class="sr-only">Facebook</span>
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg">Sell on Spareship</h3>
+                        <ul class="mt-4 space-y-2">
+                            <li>
+                                <a href="/sell-on-spareship/register.html" class="text-base text-gray-300 hover:text-white font-ptsans">Become a Seller</a>
+                            </li>
+                            <li>
+                                <a href="/sell-on-spareship/login.html" class="text-base text-gray-300 hover:text-white font-ptsans">Wholesaler Portal Login</a>
+                            </li>
+                            <li>
+                                <a href="/sell-on-spareship/guidelines.html" class="text-base text-gray-300 hover:text-white font-ptsans">Distributor Guidelines</a>
+                            </li>
+                            <li>
+                                <a href="/sell-on-spareship/bulk-enquiry.html" class="text-base text-gray-300 hover:text-white font-ptsans">Bulk Supply Enquiries</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg">Customer Care</h3>
+                        <ul class="mt-4 space-y-2">
+                            <li>
+                                <a href="/customer-care/account.html" class="text-base text-gray-300 hover:text-white font-ptsans">My Account</a>
+                            </li>
+                            <li>
+                                <a href="/customer-care/track-order.html" class="text-base text-gray-300 hover:text-white font-ptsans">Track Order</a>
+                            </li>
+                            <li>
+                                <a href="/customer-care/shipping-policy.html" class="text-base text-gray-300 hover:text-white font-ptsans">Shipping Policy</a>
+                            </li>
+                            <li>
+                                <a href="/customer-care/returns.html" class="text-base text-gray-300 hover:text-white font-ptsans">Return & Replacement</a>
+                            </li>
+                            <li>
+                                <a href="/customer-care/terms.html" class="text-base text-gray-300 hover:text-white font-ptsans">Terms of Service</a>
+                            </li>
+                            <li>
+                                <a href="/customer-care/privacy.html" class="text-base text-gray-300 hover:text-white font-ptsans">Privacy Policy</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-12 border-t border-slate-700/50 pt-8">
+                    <p class="text-base text-gray-400 text-center font-ptsans">&copy; 2026 Spareship. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function spareshipApp() {
+            return {
+                // State
+                filters: {
+                    vehicle: { selectedType: '2-Wheeler', brand: '', model: '', year: '' },
+                    stores: [], // Used by filter logic, not header
+                    category: 'All Categories',
+                    vehicleType: 'All Vehicle Types',
+                    price: { min: 150, max: 15000 },
+                    city: 'Bengaluru, KA',
+                    headerStore: 'All Stores',
+                },
+                megaMenuOpen: false,
+                activeMegaMenu: null,
+                activeParentCategory: null,
+                megaMenuData: {
+                    '2-Wheeler Parts': {
+                        'Engine Parts': ['Air Filter', 'Axle', 'Bolt', 'Cam Shaft', 'Carburetor Parts', 'Chain Adjuster', 'Chain Cover', 'Chain Guide', 'Clutch Parts', 'Gear Lever', 'Kick', 'O Ring', 'Rocker Set', 'Sprocket'],
+                        'Braking Systems': ['Brake Cam', 'Brake Pedal', 'Brake Rod', 'Brake Shoe', 'Disk Brake Parts'],
+                        'Suspension & Steering': ['Centre Stand', 'Footrest', 'Fork', 'Handle Bar Parts', 'Head Dowell Kit', 'Hub Plate', 'Shocker Bush', 'Side Stand', 'Cush Rubber'],
+                        'Electricals & Electronics': ['Electrical Parts', 'Fan Assy', 'H.L. Bracket', 'H.L. Doom', 'Indicator Stay', 'Self Start Parts', 'Speedometer Parts'],
+                        'Body & Accessories': ['Accessories', 'Centre Mat', 'Clamp', 'Graphics', 'Grip', 'Mudguard', 'Number Plate', 'Seat Parts', 'Silencer Parts', 'Tool Box'],
+                        'Fluids & Consumables': ['Petrol Pipe', 'Spring', 'Washer']
+                    },
+                    '4-Wheeler Parts': {
+                        'Engine & Drivetrain': ['Air Filter', 'Clutch Parts', 'Gear Parts'],
+                        'Braking Systems': ['Brake Pads', 'Brake Discs', 'Brake Caliper'],
+                        'Suspension & Steering': ['Shock Absorber', 'Control Arm', 'Tie Rod End'],
+                        'Electricals & Electronics': ['Alternator', 'Starter Motor', 'ECU'],
+                        'Body & Lighting': ['Headlight', 'Taillight', 'Bumper', 'Fender'],
+                        'Fluids & Consumables': ['Engine Oil', 'Coolant', 'Brake Fluid']
+                    },
+                    'EV Parts': {
+                        'Powertrain & Motors': ['Electric Motor', 'Controller', 'Inverter'],
+                        'Battery & BMS': ['Battery Pack', 'BMS', 'Cell Modules'],
+                        'Charging Systems': ['On-Board Charger', 'Charging Port'],
+                        'EV Electricals & Controllers': ['DC-DC Converter', 'Vehicle Control Unit'],
+                        'Chassis & Brakes': ['Regenerative Braking System', 'EV-specific Brake Pads']
+                    }
+                },
+                price: { min: 150, max: 15000 },
+
+                // Data
+                vehicleTypes: ['2-Wheeler', '4-Wheeler', 'EV'],
+                categoryData: {
+                   '2-Wheeler': [ 'Engine Parts', 'Braking Systems', 'Suspension & Steering', 'Electricals & Electronics', 'Body & Frame', 'Fluids & Consumables' ],
+                   '4-Wheeler': [ 'Engine & Drivetrain', 'Braking Systems', 'Suspension & Steering', 'Electricals & Electronics', 'Body & Lighting', 'Fluids & Consumables' ],
+                   'EV': [ 'Powertrain & Motors', 'Battery & BMS', 'Charging Systems', 'EV Electricals & Controllers', 'Chassis & Brakes' ]
+                },
+                vehicleData: {
+                    '2-Wheeler': {
+                        'Royal Enfield': {
+                            'Classic 350': ['2023', '2022', '2021'],
+                            'Himalayan': ['2023', '2022'],
+                        },
+                        'TVS': {
+                            'NTORQ EV': ['2023', '2022'],
+                            'Apache RTR 160': ['2023', '2022'],
+                        },
+                        'Hero': {
+                            'Splendor': ['2023', '2022', '2021'],
+                            'XPulse 200': ['2023', '2022'],
+                        }
+                    },
+                    '4-Wheeler': {
+                        'Maruti Suzuki': {
+                            'Swift': ['2023', '2022', '2021'],
+                            'Baleno': ['2023', '2022'],
+                        },
+                        'Hyundai': {
+                            'i20': ['2023', '2022', '2021'],
+                            'Creta': ['2023', '2022'],
+                        },
+                        'Tata': {
+                            'Nexon': ['2023', '2022', '2021'],
+                            'Tiago': ['2023', '2022'],
+                        }
+                    },
+                    'EV': {
+                        'Ola Electric': {
+                            'S1 Pro': ['2023', '2022'],
+                            'S1 Air': ['2023'],
+                        },
+                        'Ather': {
+                            '450X': ['2023', '2022'],
+                            '450 Plus': ['2023', '2022'],
+                        },
+                        'Bajaj EV': {
+                            'Chetak': ['2023', '2022'],
+                        }
+                    }
+                },
+                cities: ['Bengaluru, KA', 'Mumbai, MH', 'Delhi, DL', 'Chennai, TN', 'Kolkata, WB'],
+                stores: ["Fixwell Motors", "Supreme Spares", "Geeta Auto"],
+                products: [
+                    {
+                        sku: 'RE-CLUTCH-350',
+                        name: 'Clutch Plate Assembly',
+                        category: 'Engine Parts',
+                        vehicleType: '2-Wheeler',
+                        compatibility: ['Royal Enfield', 'Classic 350'],
+                        image: 'https://placehold.co/600x400/e2e8f0/334155?text=Clutch+Plate',
+                        sellers: [
+                            { name: 'Fixwell Motors', price: 1200, stock: 5 },
+                            { name: 'Supreme Spares', price: 1250, stock: 8 },
+                            { name: 'Geeta Auto', price: 1220, stock: 3 },
+                        ]
+                    },
+                    {
+                        sku: 'RE-BRAKE-PAD-F',
+                        name: 'Front Brake Pads',
+                        category: 'Braking Systems',
+                        vehicleType: '2-Wheeler',
+                        compatibility: ['Royal Enfield', 'Classic 350', 'Himalayan'],
+                        image: 'https://placehold.co/600x400/e2e8f0/334155?text=Brake+Pads',
+                        sellers: [
+                            { name: 'Fixwell Motors', price: 750, stock: 12 },
+                            { name: 'Geeta Auto', price: 780, stock: 15 },
+                        ]
+                    },
+                    {
+                        sku: 'TVS-BMS-NTORQ',
+                        name: 'Battery Management System (BMS)',
+                        category: 'Battery & BMS',
+                        vehicleType: 'EV',
+                        compatibility: ['TVS', 'NTORQ EV'],
+                        image: 'https://placehold.co/600x400/e2e8f0/334155?text=BMS',
+                        sellers: [
+                            { name: 'Supreme Spares', price: 8500, stock: 4 },
+                            { name: 'Fixwell Motors', price: 8750, stock: 2 },
+                        ]
+                    },
+                    {
+                        sku: 'TVS-MOTOR-CTRL',
+                        name: 'Motor Controller Unit',
+                        category: 'EV Electricals & Controllers',
+                        vehicleType: 'EV',
+                        compatibility: ['TVS', 'NTORQ EV'],
+                        image: 'https://placehold.co/600x400/e2e8f0/334155?text=Motor+Controller',
+                        sellers: [
+                            { name: 'Supreme Spares', price: 14500, stock: 3 },
+                        ]
+                    },
+                    {
+                        sku: 'HERO-SPL-CHAIN',
+                        name: 'Chain Sprocket Kit',
+                        category: 'Engine Parts',
+                        vehicleType: '2-Wheeler',
+                        compatibility: ['Hero', 'Splendor'],
+                        image: 'https://placehold.co/600x400/e2e8f0/334155?text=Chain+Sprocket',
+                        sellers: [
+                            { name: 'Geeta Auto', price: 950, stock: 30 },
+                            { name: 'Fixwell Motors', price: 980, stock: 25 },
+                            { name: 'Supreme Spares', price: 960, stock: 40 },
+                        ]
+                    },
+                    {
+                        sku: 'HERO-HEADLIGHT-ASSY',
+                        name: 'Headlight Assembly',
+                        category: 'Body & Frame',
+                        vehicleType: '2-Wheeler',
+                        compatibility: ['Hero', 'Splendor'],
+                        image: 'https://placehold.co/600x400/e2e8f0/334155?text=Headlight',
+                        sellers: [
+                            { name: 'Geeta Auto', price: 1100, stock: 18 },
+                        ]
+                    },
+                    {
+                        sku: 'MS-SWIFT-FILTER',
+                        name: 'Air Filter',
+                        category: 'Engine & Drivetrain',
+                        vehicleType: '4-Wheeler',
+                        compatibility: ['Maruti Suzuki', 'Swift'],
+                        image: 'https://placehold.co/600x400/e2e8f0/334155?text=Air+Filter',
+                        sellers: [
+                            { name: 'Supreme Spares', price: 450, stock: 20 },
+                        ]
+                    },
+                ],
+
+                // Computed Properties
+                get availableModels() {
+                    const vt = this.filters.vehicle.selectedType;
+                    const brand = this.filters.vehicle.brand;
+                    if (brand && this.vehicleData[vt] && this.vehicleData[vt][brand]) {
+                        return Object.keys(this.vehicleData[vt][brand]);
+                    }
+                    if (this.vehicleData[vt]) {
+                        const models = new Set();
+                        for (const b in this.vehicleData[vt]) {
+                            for (const model in this.vehicleData[vt][b]) {
+                                models.add(model);
+                            }
+                        }
+                        return Array.from(models).sort();
+                    }
+                    return [];
+                },
+                get availableYears() {
+                    const vt = this.filters.vehicle.selectedType;
+                    const brand = this.filters.vehicle.brand;
+                    const model = this.filters.vehicle.model;
+                    if (brand && model && this.vehicleData[vt] && this.vehicleData[vt][brand] && this.vehicleData[vt][brand][model]) {
+                        return this.vehicleData[vt][brand][model];
+                    }
+                    if (this.vehicleData[vt]) {
+                        const years = new Set();
+                        for (const b in this.vehicleData[vt]) {
+                            for (const m in this.vehicleData[vt][b]) {
+                                this.vehicleData[vt][b][m].forEach(year => years.add(year));
+                            }
+                        }
+                        return Array.from(years).sort((a, b) => b - a);
+                    }
+                    return [];
+                },
+                get availableCategories() {
+                    if (this.filters.vehicleType && this.categoryData[this.filters.vehicleType]) {
+                        return this.categoryData[this.filters.vehicleType];
+                    }
+                    const allCategories = Object.values(this.categoryData).flat();
+                    return [...new Set(allCategories)].sort();
+                },
+                activeMegaMenuData() {
+                    return this.megaMenuData[this.activeMegaMenu] || {};
+                },
+                activeSubCategories() {
+                    if (this.activeParentCategory && this.activeMegaMenuData()[this.activeParentCategory]) {
+                        return this.activeMegaMenuData()[this.activeParentCategory];
+                    }
+                    const firstParent = Object.keys(this.activeMegaMenuData())[0];
+                    if (firstParent) {
+                        return this.activeMegaMenuData()[firstParent];
+                    }
+                    return [];
+                },
+                get filteredProducts() {
+                    return this.products
+                        .map(p => ({ ...p, lowestPrice: Math.min(...p.sellers.map(s => s.price)) }))
+                        .filter(p => {
+                            const vehicleTypeMatch = this.filters.vehicleType === 'All Vehicle Types' || p.vehicleType === this.filters.vehicleType;
+                            const categoryMatch = this.filters.category === 'All Categories' || p.category === this.filters.category;
+                            const brandMatch = !this.filters.vehicle.brand || p.compatibility.includes(this.filters.vehicle.brand);
+                            const modelMatch = !this.filters.vehicle.model || p.compatibility.includes(this.filters.vehicle.model);
+                            const priceMatch = p.lowestPrice >= this.filters.price.min && p.lowestPrice <= this.filters.price.max;
+                            const storeMatch = this.filters.stores.length === 0 || p.sellers.some(s => this.filters.stores.includes(s.name));
+                            
+                            return vehicleTypeMatch && categoryMatch && brandMatch && modelMatch && priceMatch && storeMatch;
+                        })
+                        .sort((a, b) => a.lowestPrice - b.lowestPrice);
+                },
+
+                // Methods
+                slugify(text) {
+                    if (!text) return '';
+                    return text.toString().toLowerCase()
+                        .replace(/\s+/g, '-')           // Replace spaces with -
+                        .replace(/&/g, 'and')          // Replace & with 'and'
+                        .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+                        .replace(/\-\-+/g, '-');        // Replace multiple - with single -
+                },
+
+                openMegaMenu(menu) {
+                    this.megaMenuOpen = true;
+                    this.activeMegaMenu = menu;
+                    this.activeParentCategory = Object.keys(this.activeMegaMenuData())[0];
+                },
+                closeMegaMenu() {
+                    this.megaMenuOpen = false;
+                },
+                setActiveParentCategory(parent) {
+                    this.activeParentCategory = parent;
+                },
+
+                init() {
+                    const savedFilters = sessionStorage.getItem('spareshipFilters');
+                    if (savedFilters) {
+                        const parsedFilters = JSON.parse(savedFilters);
+                        this.filters = {
+                            ...this.filters,
+                            ...parsedFilters,
+                            vehicle: { ...this.filters.vehicle, ...(parsedFilters.vehicle || {}) },
+                            price: { ...this.filters.price, ...(parsedFilters.price || {}) },
+                            stores: Array.isArray(parsedFilters.stores) ? parsedFilters.stores : [],
+                        };
+                    } else {
+                        this.filters.stores = [];
+                    }
+
+                    this.$watch('JSON.stringify(filters)', () => {
+                        sessionStorage.setItem('spareshipFilters', JSON.stringify(this.filters));
+                    });
+ 
+                    this.$watch('filters.vehicleType', (newVehicleType) => {
+                        if (newVehicleType !== 'All Vehicle Types' && this.filters.category !== 'All Categories') {
+                            const validCategories = this.categoryData[newVehicleType] || [];
+                            if (!validCategories.includes(this.filters.category)) {
+                                this.filters.category = 'All Categories';
+                            }
+                        }
+                    });
+
+                    this.$watch('filters.vehicle.brand', (newBrand) => {
+                        const vt = this.filters.vehicle.selectedType;
+                        if (this.filters.vehicle.model && (!this.vehicleData[vt] || !this.vehicleData[vt][newBrand] || !this.vehicleData[vt][newBrand][this.filters.vehicle.model])) {
+                            this.filters.vehicle.model = '';
+                        }
+                    });
+
+                    this.$watch('filters.vehicle.model', (newModel) => {
+                        const vt = this.filters.vehicle.selectedType;
+                        const brand = this.filters.vehicle.brand;
+                        if (brand && newModel && this.filters.vehicle.year && (!this.vehicleData[vt][brand][newModel] || !this.vehicleData[vt][brand][newModel].includes(this.filters.vehicle.year))) {
+                            this.filters.vehicle.year = '';
+                        }
+                    });
+
+                    this.$watch('filters.vehicle.selectedType', () => {
+                        this.filters.vehicle.brand = '';
+                        this.filters.vehicle.model = '';
+                        this.filters.vehicle.year = '';
+                    });
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
