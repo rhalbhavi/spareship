@@ -30,12 +30,12 @@ import {
 // Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: 'AIzaSyAxiHf-joGYH6D4okYXOFbqLtjbV2BzV24', // from Firebase project settings
-  authDomain: 'spareship-b5fd4.firebaseapp.com',
-  projectId: 'spareship-b5fd4',
-  storageBucket: 'spareship-b5fd4.appspot.com',
-  messagingSenderId: '56888072733', // from Firebase project settings
-  appId: '1:56888072733:web:c3c2170e77d0da3e0404f4', // from Firebase project settings
+  apiKey: 'x', // from Firebase project settings
+  authDomain: 'x.firebaseapp.com',
+  projectId: 'x',
+  storageBucket: 'x.com',
+  messagingSenderId: 'x', // from Firebase project settings
+  appId: 'x', // from Firebase project settings
 };
 
 // Initialize Firebase
