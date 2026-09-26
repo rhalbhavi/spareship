@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Clutch Plate Assembly | Spareship</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Noto+Sans&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'PT Sans', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Alfa Slab One', cursive; letter-spacing: 0.07em; }
+        .font-ptsans { font-family: 'PT Sans', sans-serif; }
+        .font-notosans { font-family: 'Noto Sans', sans-serif; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body
+    x-data="spareshipApp({ isProductPage: true })"
+    x-init="init()"
+    @keydown.escape.window="closeMegaMenu()" class="antialiased text-slate-800 bg-white"
+>
+    <!-- Main Container -->
+    <div x-show="product" x-cloak class="flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="sticky top-0 z-30 w-full bg-[#1f004b] border-b border-slate-700/50 h-[66px]">
+            <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+                <div class="flex items-center justify-between h-full">
+                    <!-- Left side: Branding & Search -->
+                    <div class="flex items-center flex-1">
+                        <!-- App Branding -->
+                        <div class="flex-shrink-0">
+                            <a href="/index.html" class="flex items-center space-x-3">
+                                <svg class="w-[34px] h-[34px] text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                                <h1 class="text-[24px] font-bold text-white">spareship</h1>
+                            </a>
+                        </div>
+                        <!-- Search Bar -->
+                        <div class="hidden sm:block w-full max-w-5xl ml-8">
+                                <div class="flex items-center w-full bg-white rounded-md ring-1 ring-inset ring-slate-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
+                                    <!-- City Selector -->
+                                    <div x-data="{ open: false, search: filters.city, hasTyped: false }"
+                                         x-init="$watch('filters.city', val => search = val)"
+                                         @click.away="open = false; hasTyped = false; search = filters.city"
+                                         class="relative h-full flex items-center">
+                                        <div class="relative">
+                                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">📍</span>
+                                            <input
+                                                type="text"
+                                                x-model="search"
+                                                @focus="open = true; setTimeout(() => $event.target.setSelectionRange(0, 0), 0);"
+                                                @keydown="if (!hasTyped && $event.key.length === 1) { search = ''; hasTyped = true; }"
+                                                @input.debounce.300ms="hasTyped = true; open = true; if (search === '') filters.city = 'Bengaluru, KA'"
+                                                placeholder="Select City"
+                                                class="w-40 border-0 bg-transparent py-[7px] pl-8 pr-6 text-slate-900 placeholder:text-slate-400 focus:placeholder:text-slate-500 focus:ring-0 sm:text-[15px] sm:leading-6 rounded-l-md"
+                                            >
+                                            <button @click="open = !open" class="absolute inset-y-0 right-0 flex items-center px-2">
+                                                <span class="text-xs">▾</span>
+                                            </button>
+                                        </div>
+                                        <div x-show="open" x-transition x-cloak class="absolute z-10 mt-1 top-full w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                            <div class="max-h-60 overflow-y-auto">
+                                                <template x-for="city in cities.filter(c => !hasTyped || c.toLowerCase().includes((search || '').toLowerCase()))" :key="city">
+                                                    <div @click="filters.city = city; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" x-text="city"></div>
+                                                </template>
+                                                <div x-show="cities.filter(c => !hasTyped || c.toLowerCase().includes((search || '').toLowerCase())).length === 0" class="px-4 py-2 text-sm text-gray-500">No city found.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Separator -->
+                                    <div class="h-5 w-px bg-slate-300"></div>
+                                    <!-- Store/Seller Dropdown -->
+                                    <div x-data="{ open: false, search: filters.headerStore, hasTyped: false }"
+                                         x-init="$watch('filters.headerStore', val => search = val)"
+                                         @click.away="open = false; hasTyped = false; search = filters.headerStore"
+                                         class="relative h-full flex items-center">
+                                        <div class="relative">
+                                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none material-icons text-slate-400 text-[18px]">storefront</span>
+                                            <input
+                                                type="text"
+                                                x-model="search"
+                                                @focus="open = true; setTimeout(() => $event.target.setSelectionRange(0, 0), 0);"
+                                                @keydown="if (!hasTyped && $event.key.length === 1) { search = ''; hasTyped = true; }"
+                                                @input.debounce.300ms="hasTyped = true; open = true; if (search === '') filters.headerStore = 'All Stores'"
+                                                placeholder="Select Store"
+                                                class="w-40 border-0 bg-transparent py-[7px] pl-10 pr-6 text-slate-900 placeholder:text-slate-400 focus:placeholder:text-slate-500 focus:ring-0 sm:text-[15px] sm:leading-6"
+                                            >
+                                            <button @click="open = !open" class="absolute inset-y-0 right-0 flex items-center px-2">
+                                                <span class="text-xs">▾</span>
+                                            </button>
+                                        </div>
+                                        <div x-show="open" x-transition x-cloak class="absolute z-10 mt-1 top-full w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                            <div class="py-1 max-h-60 overflow-y-auto">
+                                                <div x-show="!hasTyped || 'All Stores'.toLowerCase().includes((search || '').toLowerCase())" @click="filters.headerStore = 'All Stores'; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">All Stores</div>
+                                                <template x-for="store in stores.filter(s => !hasTyped || s.toLowerCase().includes((search || '').toLowerCase()))" :key="store">
+                                                    <div @click="filters.headerStore = store; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" x-text="store"></div>
+                                                </template>
+                                                <div x-show="hasTyped && !('All Stores'.toLowerCase().includes((search || '').toLowerCase())) && stores.filter(s => s.toLowerCase().includes((search || '').toLowerCase())).length === 0" class="px-4 py-2 text-sm text-gray-500">No stores found.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Separator -->
+                                    <div class="h-5 w-px bg-slate-300"></div>
+                                    <!-- Vehicle Type Dropdown (connected to main app state) -->
+                                    <div x-data="{ open: false, search: filters.vehicleType, hasTyped: false }"
+                                         x-init="$watch('filters.vehicleType', val => { search = val; if (val === 'All Vehicle Types') { filters.category = 'All Categories'; } })"
+                                         @click.away="open = false; hasTyped = false; search = filters.vehicleType"
+                                         class="relative h-full flex items-center">
+                                        <div class="relative">
+                                            <input
+                                                type="text"
+                                                x-model="search"
+                                                @focus="open = true; setTimeout(() => $event.target.setSelectionRange(0, 0), 0);"
+                                                @keydown="if (!hasTyped && $event.key.length === 1) { search = ''; hasTyped = true; }"
+                                                @input.debounce.300ms="hasTyped = true; open = true; if (search === '') filters.vehicleType = 'All Vehicle Types'"
+                                                placeholder="Vehicle Type"
+                                                class="w-[130px] border-0 bg-transparent py-[7px] pl-3 pr-6 text-slate-900 placeholder:text-slate-400 focus:placeholder:text-slate-500 focus:ring-0 sm:text-[15px] sm:leading-6"
+                                            >
+                                            <button @click="open = !open" class="absolute inset-y-0 right-0 flex items-center px-2">
+                                                <span class="text-xs">▾</span>
+                                            </button>
+                                        </div>
+                                        <div x-show="open" x-transition x-cloak class="absolute z-10 mt-1 top-full w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                            <div class="py-1 max-h-60 overflow-y-auto">
+                                                <div x-show="!hasTyped || 'All Vehicle Types'.toLowerCase().includes((search || '').toLowerCase())" @click="filters.vehicleType = 'All Vehicle Types'; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">All Vehicle Types</div>
+                                                <template x-for="type in vehicleTypes.filter(t => !hasTyped || t.toLowerCase().includes((search || '').toLowerCase()))" :key="type">
+                                                    <div @click="filters.vehicleType = type; open = false; hasTyped = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" x-text="type"></div>
+                                                </template>
+                                                <div x-show="!('All Vehicle Types'.toLowerCase().includes((search || '').toLowerCase())) && vehicleTypes.filter(t => t.toLowerCase().includes((search || '').
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Separator -->
+                                    <div class="h-5 w-px bg-slate-300"></div>
+                                    <!-- Search Input -->
+                                    <div class="relative flex-grow h-full flex items-center">
+                                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                            <span class="material-icons text-slate-400 text-[20px]">search</span>
+                                        </div>
+                                        <input type="text" name="search" id="search" class="block w-full border-0 bg-transparent py-[7px] pl-10 pr-3 text-slate-900 placeholder:text-slate-400 focus:ring-0 sm:text-[15px] sm:leading-6 h-full" placeholder="Search Spareship">
+                                    </div>
+                                    <button @click="window.location.href = '/index.html'" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-[7px] px-[19px] rounded-r-md">Search</button>
+                                </div>
+                        </div>
+                    </div>
+                    <!-- Right side: Actions -->
+                    <div class="flex items-center space-x-2 sm:space-x-4 ml-4">
+                        <div class="hidden sm:flex items-center space-x-2">
+                            <a href="/sign-up.html" class="text-[15px] font-medium text-white bg-[oklch(43.2%_0.232_292.759)] hover:opacity-90 transition-colors px-[15px] py-[7px] rounded-md">
+                                Sign Up
+                            </a>
+                            <a href="/login.html" class="text-[15px] font-medium text-white bg-transparent hover:bg-slate-800/50 transition-colors px-[15px] py-[7px] rounded-md">
+                                Login
+                            </a>
+                            <a href="/tools.html" class="text-[15px] font-medium bg-yellow-400 hover:bg-yellow-500 text-black transition-colors px-[15px] py-[7px] rounded-md flex items-center space-x-2">
+                                <span class="material-icons text-[16px]">build</span>
+                                <span>Tools</span>
+                            </a>
+                        </div>
+                        <button class="lg:hidden text-slate-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mega Menu Navigation -->
+        <div @mouseleave="closeMegaMenu()" class="relative">
+            <nav class="bg-slate-100 shadow-md">
+                <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-center h-12">
+                        <div class="flex space-x-8">
+                            <div @mouseenter="openMegaMenu('2-Wheeler Parts')" class="flex items-center">
+                                <a href="#" class="text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-bold font-ptsans">2-Wheeler Parts</a>
+                            </div>
+                            <div @mouseenter="openMegaMenu('4-Wheeler Parts')" class="flex items-center">
+                                <a href="#" class="text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-bold font-ptsans">4-Wheeler Parts</a>
+                            </div>
+                            <div @mouseenter="openMegaMenu('EV Parts')" class="flex items-center">
+                                <a href="#" class="text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-bold font-ptsans">EV Parts</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Mega Menu Panel -->
+            <div x-show="megaMenuOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-2"
+                 x-cloak
+                 class="absolute top-full left-0 w-full bg-white border-t border-slate-200 shadow-lg z-40">
+                <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-12 gap-8 py-6">
+                    <!-- Left Column: Parent Categories -->
+                    <div class="col-span-3">
+                        <ul class="space-y-1">
+                            <template x-for="parentCategory in Object.keys(activeMegaMenuData())" :key="parentCategory">
+                                <li @mouseenter="setActiveParentCategory(parentCategory)">
+                                    <a :href="`/categories/${slugify(activeMegaMenu.replace(' Parts', ''))}/${slugify(parentCategory)}.html`" class="flex justify-between items-center p-3 rounded-lg text-slate-700 font-semibold text-base transition-colors duration-150" :class="{ 'bg-slate-100 text-indigo-600': activeParentCategory === parentCategory, 'hover:bg-slate-50': activeParentCategory !== parentCategory }">
+                                        <span x-text="parentCategory"></span>
+                                        <span class="material-icons text-lg">chevron_right</span>
+                                    </a>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                    <!-- Right Column: Sub-Categories -->
+                    <div class="col-span-9">
+                        <div class="grid grid-cols-4 gap-x-6 gap-y-4">
+                            <template x-for="subCategory in activeSubCategories()" :key="subCategory">
+                                <a :href="`/categories/${slugify(activeMegaMenu.replace(' Parts', ''))}/${slugify(activeParentCategory)}/${slugify(subCategory)}.html`" class="block p-2 rounded-md hover:bg-slate-50 text-base text-slate-600 hover:text-indigo-600" x-text="subCategory"></a>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 w-full">
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Left Column: Product Images -->
+                <div>
+                    <div class="aspect-square bg-slate-100 rounded-lg mb-4">
+                        <img :src="product.image" :alt="product.name" class="w-full h-full object-cover rounded-lg">
+                    </div>
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="aspect-square bg-slate-100 rounded-lg border-2 border-indigo-500">
+                            <img src="https://placehold.co/200x200/e2e8f0/334155?text=View+1" alt="View 1" class="w-full h-full object-cover rounded-md">
+                        </div>
+                        <div class="aspect-square bg-slate-100 rounded-lg">
+                             <img src="https://placehold.co/200x200/e2e8f0/334155?text=View+2" alt="View 2" class="w-full h-full object-cover rounded-md">
+                        </div>
+                        <div class="aspect-square bg-slate-100 rounded-lg">
+                             <img src="https://placehold.co/200x200/e2e8f0/334155?text=View+3" alt="View 3" class="w-full h-full object-cover rounded-md">
+                        </div>
+                        <div class="aspect-square bg-slate-100 rounded-lg">
+                             <img src="https://placehold.co/200x200/e2e8f0/334155?text=View+4" alt="View 4" class="w-full h-full object-cover rounded-md">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Product Details -->
+                <div x-data="{ quantity: 1 }">
+                    <!-- Buy Box Winner Section -->
+                    <div x-show="buyBoxWinner" class="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
+                        <h2 class="text-3xl font-bold text-slate-900" x-text="product.name"></h2>
+                        <p class="text-sm text-slate-500 mt-1">OEM: <span x-text="product.sku"></span></p>
+
+                        <div class="mt-4">
+                            <span class="text-3xl font-bold text-green-600"><span class="font-notosans">₹</span><span x-text="buyBoxWinner.price.toLocaleString('en-IN')"></span></span>
+                            <span class="text-sm text-slate-500 ml-2">(incl. GST)</span>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-base text-slate-600">Sold by <strong class="text-slate-900" x-text="buyBoxWinner.name"></strong></p>
+                            <span class="inline-flex items-center gap-x-1.5 rounded-md bg-yellow-100 px-2 py-1 text-sm font-medium text-yellow-800">
+                                <svg class="h-1.5 w-1.5 fill-yellow-500" viewBox="0 0 6 6" aria-hidden="true"><circle cx="3" cy="3" r="3" /></svg>
+                                Closest To You
+                            </span>
+                        </div>
+
+                        <div class="mt-6 flex items-center space-x-4">
+                            <!-- Quantity Selector -->
+                            <div class="flex items-center border border-slate-300 rounded-md bg-white">
+                                <button @click="quantity = Math.max(1, quantity - 1)" class="px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-l-md" :disabled="quantity === 1">-</button>
+                                <input type="text" x-model.number="quantity" @change="quantity = Math.max(1, quantity)" class="w-12 text-center border-x border-slate-300 focus:outline-none bg-white">
+                                <button @click="quantity++" class="px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-r-md">+</button>
+                            </div>
+
+                            <!-- Wishlist Button -->
+                            <button class="p-2 border border-slate-300 rounded-md text-slate-600 bg-white hover:bg-slate-100 hover:text-red-500">
+                                <span class="material-icons">favorite_border</span>
+                            </button>
+
+                            <!-- Add to Cart Button -->
+                            <button class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                                <span class="material-icons">shopping_cart</span>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 border-t pt-8">
+                        <dl class="grid grid-cols-2 gap-x-4 gap-y-2">
+                            <dt class="text-sm font-medium text-slate-500">Category</dt>
+                            <dd class="text-sm text-slate-900" x-text="product.category"></dd>
+
+                            <dt class="text-sm font-medium text-slate-500">Brand</dt>
+                            <dd class="text-sm text-slate-900" x-text="product.compatibility[0]"></dd>
+
+                            <dt class="text-sm font-medium text-slate-500">Model</dt>
+                            <dd class="text-sm text-slate-900" x-text="product.compatibility.slice(1).join(', ')"></dd>
+
+                            <dt class="text-sm font-medium text-slate-500">Availability</dt>
+                            <dd class="text-sm text-slate-900">
+                                <span x-show="product.sellers.some(s => s.stock > 0)" class="inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-200">
+                                    In Stock
+                                </span>
+                                <span x-show="!product.sellers.some(s => s.stock > 0)" class="inline-flex items-center rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-800 ring-1 ring-inset ring-red-200">
+                                    Out of Stock
+                                </span>
+                            </dd>
+                        </dl>
+                    </div>
+                    
+                    <div x-show="product.sellers && product.sellers.length > 0" class="mt-8 border-t pt-8">
+                        <h3 class="text-xl font-bold text-slate-900 mb-4">Available Sellers</h3>
+                        <div class="flow-root">
+                            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                                    <table class="min-w-full divide-y divide-slate-200">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-0">Seller</th>
+                                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Price</th>
+                                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Availability</th>
+                                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Distance</th>
+                                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0"><span class="sr-only">Action</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-200">
+                                            <template x-for="seller in product.sellers" :key="seller.name">
+                                                <tr :class="{'bg-yellow-50': seller.name === buyBoxWinner.name}">
+                                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-0" x-text="seller.name"></td>
+                                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">
+                                                        <span class="font-notosans">₹</span><span x-text="seller.price.toLocaleString('en-IN')"></span>
+                                                        <span class="text-xs text-slate-500">(incl. GST)</span>
+                                                    </td>
+                                                    <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                                        <template x-if="seller.stock > 0">
+                                                            <span class="inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-200">
+                                                                <span x-text="seller.stock" class="mr-1"></span>items left
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="seller.stock === 0">
+                                                            <span class="inline-flex items-center rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-800 ring-1 ring-inset ring-red-200">
+                                                                Out of Stock
+                                                            </span>
+                                                        </template>
+                                                    </td>
+                                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">
+                                                        <template x-if="seller.name === buyBoxWinner.name">
+                                                            <span class="inline-flex items-center gap-x-1.5 rounded-md bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">
+                                                                <svg class="h-1.5 w-1.5 fill-yellow-500" viewBox="0 0 6 6" aria-hidden="true"><circle cx="3" cy="3" r="3" /></svg>
+                                                                Closest To You (<span x-text="seller.distance.toFixed(1)"></span> km)
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="seller.name !== buyBoxWinner.name">
+                                                            <span class="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                                                                <svg class="h-1.5 w-1.5 fill-slate-400" viewBox="0 0 6 6" aria-hidden="true"><circle cx="3" cy="3" r="3" /></svg>
+                                                                <span x-text="seller.distance.toFixed(1)"></span> km away
+                                                            </span>
+                                                        </template>
+                                                    </td>
+                                                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                                                        <button :disabled="seller.stock === 0" class="text-xs font-bold py-1 px-2 rounded-md" :class="seller.name === buyBoxWinner.name ? 'bg-yellow-400 hover:bg-yellow-500 text-black' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'">Add to Cart</button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Not Found Message -->
+    <div x-show="!product" x-cloak class="flex-1 flex items-center justify-center p-8 text-center">
+        <div>
+            <svg class="mx-auto h-12 w-12 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="mt-2 text-lg font-medium text-slate-900">Product Not Found</h3>
+            <p class="mt-1 text-sm text-slate-500">We couldn't find the product you're looking for.</p>
+            <div class="mt-6">
+                <a href="/index.html" class="text-base font-medium text-indigo-600 hover:text-indigo-500">
+                    Go back home
+                    <span aria-hidden="true"> &rarr;</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#1f004b] text-white">
+        <div class="max-w-8xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg">About Us</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li>
+                            <a href="/about.html" class="text-base text-gray-300 hover:text-white font-ptsans">About Us</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg">Connect With Us</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li>
+                            <a href="https://www.facebook.com/profile.php?id=61591875527493" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white">
+                                <span class="sr-only">Facebook</span>
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg">Sell on Spareship</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li>
+                            <a href="/sell-on-spareship/register.html" class="text-base text-gray-300 hover:text-white font-ptsans">Become a Seller</a>
+                        </li>
+                        <li>
+                            <a href="/sell-on-spareship/login.html" class="text-base text-gray-300 hover:text-white font-ptsans">Wholesaler Portal Login</a>
+                        </li>
+                        <li>
+                            <a href="/sell-on-spareship/guidelines.html" class="text-base text-gray-300 hover:text-white font-ptsans">Distributor Guidelines</a>
+                        </li>
+                        <li>
+                            <a href="/sell-on-spareship/bulk-enquiry.html" class="text-base text-gray-300 hover:text-white font-ptsans">Bulk Supply Enquiries</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg">Customer Care</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li>
+                            <a href="/customer-care/account.html" class="text-base text-gray-300 hover:text-white font-ptsans">My Account</a>
+                        </li>
+                        <li>
+                            <a href="/customer-care/track-order.html" class="text-base text-gray-300 hover:text-white font-ptsans">Track Order</a>
+                        </li>
+                        <li>
+                            <a href="/customer-care/shipping-policy.html" class="text-base text-gray-300 hover:text-white font-ptsans">Shipping Policy</a>
+                        </li>
+                        <li>
+                            <a href="/customer-care/returns.html" class="text-base text-gray-300 hover:text-white font-ptsans">Return & Replacement</a>
+                        </li>
+                        <li>
+                            <a href="/customer-care/terms.html" class="text-base text-gray-300 hover:text-white font-ptsans">Terms of Service</a>
+                        </li>
+                        <li>
+                            <a href="/customer-care/privacy.html" class="text-base text-gray-300 hover:text-white font-ptsans">Privacy Policy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-12 border-t border-slate-700/50 pt-8">
+                <p class="text-base text-gray-400 text-center font-ptsans">&copy; 2026 Spareship. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

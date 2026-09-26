@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Spareship</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Noto+Sans&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'PT Sans', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Alfa Slab One', cursive; letter-spacing: 0.07em; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body
+    x-data="authApp"
+    class="antialiased text-slate-800 bg-white flex flex-col min-h-screen"
+>
+    <!-- Header -->
+    <header class="sticky top-0 z-30 w-full bg-[#1f004b] border-b border-slate-700/50 h-[66px]">
+        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+            <div class="flex items-center justify-between h-full">
+                <!-- Left side: Branding -->
+                <div class="flex items-center flex-1">
+                    <a href="/index.html" class="flex items-center space-x-3">
+                        <svg class="w-[34px] h-[34px] text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        </svg>
+                        <h1 class="text-[24px] font-bold text-white">spareship</h1>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg text-slate-800">
+            <div>
+                <h2 class="mt-6 text-center text-[33px] font-bold text-slate-900">
+                    Create your account
+                </h2>
+                <p class="mt-2 text-center text-[17px] text-slate-600">
+                    Or <a href="/login.html" class="font-medium text-indigo-600 hover:text-indigo-500">sign in to your existing account</a>
+                </p>
+            </div>
+
+            <!-- Google Sign Up Button -->
+            <button @click="handleGoogleSignUp()" class="w-full flex justify-center items-center py-2 px-4 border border-slate-300 rounded-md shadow-sm bg-white text-[17px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="w-5 h-5 mr-2" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 381.5 512 244 512 111.3 512 0 398.5 0 256S111.3 0 244 0c69.9 0 131.5 28.4 176.9 74.L373.5 154.3c-27.2-25.6-63.3-41-105.2-41-82.8 0-150.5 67.7-150.5 150.5S185.5 406.3 268.3 406.3c96.3 0 135.7-70.1 141.1-106.3H268.3v-69.6h218.8c2.9 16.2 4.9 33.3 4.9 51.8z"></path></svg>
+                Sign up with Google
+            </button>
+
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-slate-300"></div>
+                </div>
+                <div class="relative flex justify-center text-[17px]">
+                    <span class="px-2 bg-white text-slate-500">
+                        Or continue with email
+                    </span>
+                </div>
+            </div>
+
+            <!-- Sign Up Form -->
+            <form class="mt-8 space-y-6" @submit.prevent="handleEmailSignUp()">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="full-name" class="sr-only">Full name</label>
+                        <input id="full-name" name="name" type="text" autocomplete="name" required x-model="name" class="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 text-[17px]" placeholder="Full name">
+                    </div>
+                    <div>
+                        <label for="email-address" class="sr-only">Email address</label>
+                        <input id="email-address" name="email" type="email" autocomplete="email" required x-model="email" class="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 text-[17px]" placeholder="Email address">
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">Password</label>
+                        <input id="password" name="password" :type="passwordFieldType" @focus="passwordFieldType = 'password'" autocomplete="new-password" required x-model="passwordValue" class="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 text-[17px]" placeholder="Password">
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div x-show="errorMessage" x-cloak class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-md text-[17px]">
+                    <p x-text="errorMessage"></p>
+                </div>
+
+                <div>
+                    <button type="submit" :disabled="loading" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-[17px] font-medium rounded-md text-black bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:bg-slate-300 disabled:cursor-not-allowed">
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <svg x-show="loading" class="animate-spin h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                        Create account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script type="module">
+        import {
+            auth,
+            createUserWithEmailAndPassword,
+            updateProfile,
+            GoogleAuthProvider,
+            signInWithPopup
+        } from '/js/firebase-config.js';
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('authApp', () => ({
+                    name: '',
+                    email: '',
+                    passwordValue: '',
+                    passwordFieldType: 'text',
+                    loading: false,
+                    errorMessage: '',
+
+                    async handleEmailSignUp() {
+                        if (!this.name) {
+                            this.errorMessage = 'Please enter your full name.';
+                            return;
+                        }
+                        this.loading = true;
+                        this.errorMessage = '';
+                        try {
+                            const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.passwordValue);
+                            await updateProfile(userCredential.user, {
+                                displayName: this.name
+                            });
+                            console.log('User created and profile updated:', userCredential.user);
+                            window.location.href = '/index.html';
+                        } catch (error) {
+                            this.errorMessage = this.getFriendlyErrorMessage(error);
+                            console.error('Sign up error:', error);
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    async handleGoogleSignUp() {
+                        this.loading = true;
+                        this.errorMessage = '';
+                        try {
+                            const provider = new GoogleAuthProvider();
+                            const result = await signInWithPopup(auth, provider);
+                            console.log('Google user signed in:', result.user);
+                            window.location.href = '/index.html';
+                        } catch (error) {
+                            this.errorMessage = this.getFriendlyErrorMessage(error);
+                            console.error('Google sign up error:', error);
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    getFriendlyErrorMessage(error) {
+                        switch (error.code) {
+                            case 'auth/email-already-in-use':
+                                return 'This email address is already in use by another account.';
+                            case 'auth/invalid-email':
+                                return 'Please enter a valid email address.';
+                            case 'auth/weak-password':
+                                return 'Password should be at least 6 characters long.';
+                            case 'auth/popup-closed-by-user':
+                                return 'The sign-up process was cancelled.';
+                            default:
+                                return 'An unexpected error occurred. Please try again.';
+                        }
+                    }
+            }));
+        });
+    </script>
+</body>
+</html>
